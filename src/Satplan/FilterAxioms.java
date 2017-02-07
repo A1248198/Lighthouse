@@ -56,9 +56,11 @@ public class FilterAxioms
         assioma2(nomiFluenti,i,spi,r);
         for(AzioneGround a:azioniEsplorate){
             //System.out.println(a);
+            r.putLeaf("Azione", a.mkLitName(), "Assioma1","Azioni");
         }
         for(PredicateInst p:fluentiEsplorati){
             System.out.println(p);
+            r.putLeaf("Fluente", p.mkLiteralName(), "Assioma1","Fluenti");
         }
         
     }
