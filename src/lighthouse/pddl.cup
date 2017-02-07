@@ -1,0 +1,207 @@
+
+
+
+import java_cup.runtime.*;
+import java.util.List;
+import java.util.LinkedList;
+import lighthouse.Instance;
+import lighthouse.LHType;
+import lighthouse.Predicate;
+import LHExceptions.ParserExceptions.*;
+//parser code {:
+    // Connect this parser to a scanner!
+//    Scanner s;
+//    Parser(Scanner s){ this.s=s; }
+//:}
+
+parser code{:
+
+Instance i = new Instance();
+
+public Instance getInstance(){
+return i ;
+}
+
+private String filename(){
+    
+    Lexer l = (Lexer) this.getScanner();
+    return l.getFilename();
+}
+public String getWhere(){
+
+    Lexer l = (Lexer) this.getScanner();
+    return (l.getFilename()+" line "+(l.getLine()+1)+" col: "+(l.getColumn()+1));
+}
+
+public void printWhere(){
+
+    Lexer l = (Lexer) this.getScanner();
+    System.out.println("Line "+(l.getLine()+1)+" col: "+(l.getColumn()+1));
+}
+ public void report_fatal_error(String message, Object info){
+    //printWhere();
+    report_error(message,info);
+    throw new SyntaxErrorError("Syntax error");
+    //super.report_fatal_error("",info);
+}
+
+
+@Override
+	protected void report_expected_token_ids() {
+	  List<Integer> ids = expected_token_ids();
+	  LinkedList<String> list = new LinkedList<String>();
+	  for (Integer expected : ids)
+		  list.add(symbl_name_from_id(expected));
+	  String msg = "instead expected token classes are " + list + "error token is "+ symbl_name_from_id(super.cur_token.sym);
+	  System.err.println(msg);
+//errMan.Error(ErrorSource.Parser, msg);
+	}
+
+private void warningMissing(String str){
+System.err.println("WARNING: Missing \""+str+"\" in "+getWhere());
+}
+private void error(String str){
+System.err.println("ERROR:  "+str);
+throw new SyntaxErrorError("Syntax error");
+}
+
+private void abort(){
+System.exit(1);
+}
+
+protected int error_sync_size(){
+return 1;
+}
+    
+
+public void report_error(String message, Object info) {
+   
+        StringBuffer m = new StringBuffer("Error");
+        m.append(filename());
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+            if (s.left >= 0) {                
+                m.append(" in line "+(s.left+1));   
+                if (s.right >= 0)                    
+                    m.append(", column "+(s.right+1));
+            }
+        }
+   
+        m.append(" : "+message);
+   
+        System.err.println(m);
+        //super.report_error("",info);
+    }
+
+
+:}
+/* define how to connect to the scanner! */
+/*init with {: s.init(); :};*/
+//scan with {:
+//:}
+
+/* Terminals (tokens returned by the scanner). */
+terminal SEMI, COL, ACTIONS ,PRE,POST, LPAREN, RPAREN, INITIAL,PREDICATES ,CONSTANTS, FINAL,SLASH,COMMA, LCURLY , RCURLY ,MINUS,SCRIPTBOUND,MANEOF;
+terminal String  ID;
+terminal Integer NUMBER;
+terminal String SCRIPTCODE;
+
+non terminal predicatesdecl;
+non terminal predicateDeclarationList;
+non terminal predicateDeclaration;
+non terminal List<PredicateInst> predicates;
+non terminal List<PredicateInst> precond;
+non terminal List<PredicateInst> postcond;
+non terminal PredicateInst predicate;
+non terminal finaldecl;
+non terminal actiond;
+non terminal actionlist;
+non terminal actiondecl;
+non terminal PDDL;
+non terminal initialdecl;
+non terminal constantsdecl;
+non terminal List<String> mixlist;
+non terminal script;
+non terminal fileBreak;
+start with PDDL;
+
+script ::=
+{::}|
+ SCRIPTBOUND SCRIPTCODE:code SCRIPTBOUND {:System.out.println(code);i.addScript(code);i.runScripts();:};
+
+predicatesdecl ::= PREDICATES COL predicateDeclarationList SEMI {::}
+                |  PREDICATES  predicateDeclarationList SEMI {:warningMissing(":"); :}
+                |  PREDICATES  error SEMI {: error("syntax error in the predicate declaration"); :}
+;
+
+predicateDeclarationList ::= predicateDeclarationList COMMA predicateDeclaration
+                        |  predicateDeclaration
+;
+
+predicateDeclaration ::= ID:name SLASH NUMBER:num 
+                        {:i.registerPredicate(name,num);:}
+                       | ID SLASH
+                        {: error("Missing number, should be predicate/arity"); :}
+;
+
+
+
+initialdecl ::= INITIAL COL predicates:pcs SEMI 
+{:  i.setInitial(pcs); :}
+;
+
+finaldecl ::= FINAL COL predicates:p SEMI
+{: i.setFinal(p); :}
+;
+
+constantsdecl ::= CONSTANTS COL mixlist:cl SEMI
+{:  for (String c : cl){ i.registerConstant(c); } :}
+;
+
+predicates ::= predicates:pp COMMA predicate:p {: RESULT = pp; pp.add(p); :}
+        | predicate:p {: RESULT = new LinkedList<PredicateInst>(); RESULT.add(p); :}
+;
+predicate ::= ID:pname LPAREN mixlist:cl RPAREN {: RESULT = new PredicateInst(pname,cl); :}
+            | MINUS ID:pname LPAREN mixlist:cl RPAREN {: RESULT = new PredicateInst(pname,cl,true); :}
+            | ID:pname LPAREN RPAREN {: RESULT = new PredicateInst(pname,false); :}
+            | MINUS ID:pname LPAREN RPAREN {: RESULT = new PredicateInst(pname,true); :}
+;
+
+mixlist ::= mixlist:m COMMA ID:c {:RESULT = m ; m.add(c);:}
+          | ID:id {: RESULT = new LinkedList<>(); RESULT.add(id); :}
+;
+
+actiondecl ::= ACTIONS COL actionlist SEMI
+            |  ACTIONS actionlist SEMI {: warningMissing(":"); :}
+            //|  ACTIONS COL error SEMI {: error("error in the actions declarations"); :}
+;
+actionlist ::= actionlist actiond
+            | actiond
+;
+actiond ::= ID:actionName LPAREN mixlist:varList RPAREN LCURLY precond:pre postcond:post RCURLY
+        {: i.registerAction(actionName,varList,pre,post); :}
+        | ID:actionName LPAREN  RPAREN LCURLY precond:pre postcond:post RCURLY
+        {: i.registerAction(actionName,null,pre,post); :}
+;
+precond ::= PRE COL predicates:pp SEMI {: RESULT = pp; :}
+          | PRE COL  SEMI {:RESULT = new LinkedList<PredicateInst>();:}
+;
+postcond ::= POST COL predicates:pp SEMI {: RESULT = pp; :}
+
+;
+
+fileBreak ::= MANEOF {:
+//System.out.println("reached end of file");
+:}
+;
+
+PDDL ::= //script constantsdecl script predicatesdecl initialdecl finaldecl actiondecl
+        script predicatesdecl actiondecl fileBreak script constantsdecl initialdecl finaldecl script
+//      | constantsdecl predicatesdecl initialdecl finaldecl actiondecl 
+//      | predicatesdecl constantsdecl initialdecl finaldecl actiondecl
+//      | predicatesdecl constantsdecl finaldecl initialdecl actiondecl
+//      | constantsdecl predicatesdecl finaldecl initialdecl actiondecl
+;
+
+

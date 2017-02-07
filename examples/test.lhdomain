@@ -1,0 +1,21 @@
+predicates:
+    on/2, clear/1,ontable/1
+;
+
+
+
+actions:
+    movetoblock(x,y,z){//move block x from y to z
+        pre: on(x,y),-=(y,z),-=(x,z),clear(z),clear(x);
+        post: on(x,z), -on(x,y), clear(y), -clear(z);
+    }
+
+    movetotable(x,y){
+        pre: on(x,y),-=(x,y),clear(x);
+        post: -on(x,y),ontable(x),clear(y);
+    }
+    movefromtable(x,y){
+        pre: ontable(x),-=(x,y), clear(y), clear(x);
+        post: on(x,y), -clear(y), -ontable(x);
+    }
+;

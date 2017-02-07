@@ -1,0 +1,38 @@
+$$$
+dofile("Scripts/integers.lua")
+--dofile("Scripts/equivalence.lua")
+--interactive()
+$$$
+
+predicates:
+    contains/2, capacity/2,bucket/1,source/1,target/1,working/0, pulled/0
+;
+
+
+
+actions:
+    
+    pull(from,fromqty,fromqtynext){
+        pre: bucket(from),contains(from,fromqty),integer(fromqty),integer(fromqtynext),succ(fromqtynext,fromqty),-zero(fromqtynext),source(from),-pulled();
+        post: contains(from,fromqtynext),-contains(from,fromqty),pulled();
+    }
+    pullAndStop(from,fromqty,fromqtynext){
+        pre: bucket(from), contains(from,fromqty),integer(fromqty),integer(fromqtynext),succ(fromqtynext,fromqty),zero(fromqtynext),source(from),-pulled();
+        post: contains(from,fromqtynext),-contains(from,fromqty),pulled(),-working();
+    }
+    put(to,tocap,toqty,toqtynext){
+        pre: target(to),bucket(to),integer(tocap),integer(toqty),integer(toqtynext),contains(to,toqty),succ(toqty,toqtynext),capacity(to,tocap),-=(toqtynext,tocap),pulled();
+        post: contains(to,toqtynext),-contains(to,toqty),-pulled();
+    }
+    putAndStop(to,tocap,toqty,toqtynext){
+        pre: target(to),bucket(to),integer(tocap),integer(toqty),integer(toqtynext),contains(to,toqty),succ(toqty,toqtynext),capacity(to,tocap),=(toqtynext,tocap),pulled();
+        post: contains(to,toqtynext),-contains(to,toqty),-pulled(),-working();
+    }
+
+
+    start(from,fromqty,to,tocap,toqty){
+        pre: contains(from,fromqty),contains(to,toqty),-=(from,to),capacity(to,tocap),bucket(from),bucket(to),integer(fromqty),integer(toqty), -zero(fromqty),-=(tocap,toqty),-working();
+        post: working(),source(from),target(to);
+    }
+
+;

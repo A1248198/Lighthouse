@@ -1,0 +1,25 @@
+
+
+predicates: road/2, at/2 , mobile/1, bridge/2 , person/1 , vehicle/1 , driving/2;
+
+actions:
+    drive(what,from,to){
+        pre: road(from,to), at(what,from) , mobile(what) , -=(from,to);
+        post: at(what,to), -at(what,from);
+    }
+
+    cross(what,from,to){
+        pre: bridge(from,to), at(what,from), mobile(what), -=(from,to);
+        post: at(what,to), -at(what,from);
+    }
+
+    board(who,where,what){
+        pre: at(who,where), person(who), vehicle(what), at(what,where), -=(who,what);
+        post: driving(who,what), -at(who,where), -mobile(who), mobile(what);
+    }
+
+    disembark(who,where,what){
+        pre: person(who),vehicle(what),driving(who,what),at(what,where),-=(who,what);
+        post: at(who,where),-driving(who,what),-mobile(what),mobile(who);
+    }
+;

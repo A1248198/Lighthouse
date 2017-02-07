@@ -1,0 +1,23 @@
+constants:
+    A, B, C
+;
+initial:
+    on(A,B) , on(B,C), ontable(C) , clear(A)
+;
+
+final:
+    on(C,B),on(B,A),ontable(A)
+;
+
+
+$$$
+--loadfile('Scripts/integers.lua')
+--dofile('Scripts/integers.lua')
+--dofile('Scripts/equivalence.lua')
+--require('integers')
+--mkInteger('int',5)
+--mkDiff()
+--mkEquals()
+--interactive()
+$$$
+
