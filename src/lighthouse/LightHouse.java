@@ -19,6 +19,7 @@ package lighthouse;
 import Report.Report;
 import Satplan.FilterAxioms;
 import Satplan.SatPlanInstance;
+import Satplan.SatPlanSettings;
 import it.uniroma1.di.tmancini.teaching.ai.SATCodec.SATModelDecoder;
 import it.uniroma1.di.tmancini.utils.CmdLineOptions;
 import java.io.FileNotFoundException;
@@ -113,7 +114,7 @@ public class LightHouse
             FilterAxioms.mkSatPlan(instance, spi, r);
             //Axioms.Axiom1(p.getInstance(),spi,r);
             spi.verify();
-            String show = "__action__.*";
+            String show = SatPlanSettings.ACTIONPREFIX+".*";
             String prefix  = "cnf";
             for(int j = 2; j<=t+1; j+=1){
                 spi.encode2(prefix+(j-1),j);
@@ -157,7 +158,8 @@ public class LightHouse
             try {
                 domain = new FileOutputStream(clo.getOptionValue("pddl-prefix")+"domain.pddl");
                 problem = new FileOutputStream(clo.getOptionValue("pddl-prefix")+ "problem.pddl");
-                StripsEncoder.generateStrips(instance, domain, problem);
+                StripsEncoder encoder = new StripsEncoder(instance,domain,problem);
+                encoder.generateStrips();
             } catch (IOException ex) {
                 Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
@@ -212,7 +214,7 @@ public class LightHouse
             bis = new FileInputStream(new File(filename));
             smd.decodeSat4j(bis, reader.decode(problem.model()));
             smd.printout(true,null);
-            //smd.printout(true,".*");
+            smd.printout(true,show);
             return true;
         }
         else{

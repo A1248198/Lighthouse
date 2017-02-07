@@ -23,9 +23,23 @@ package NCNF;
 public class Formula
 {
     Node rootNode;
+
+    /**
+     * A class to represent a generic Propositional Calculus formula
+     * for display purposes only, no checks are performed
+     */
     public Formula(){
-       rootNode = new Node();
+        rootNode = new Node();
     }
+    public Formula(Node root){
+        rootNode = root;
+    }
+
+    /**
+     * Put a new <code>Node</code> in the formula tree.
+     * @param what A node to append, not null.
+     * @param where  A path to take from the root node to the 'what' node father, a negative value traverses the children list from the right. (for example put(node) will put append node to the root, put(node,0) will append to the roots first child, put(node,-1) to the roots last child.
+     */
     public void put(Node what,int ... where){
         Node current = rootNode;
         for(int i : where){

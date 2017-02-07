@@ -72,6 +72,9 @@ public class AzioneGround implements Comparable<AzioneGround>
     public String getName(){
         return a.getName();
     }
+    public String getCNFName(){
+        return SatPlanSettings.ACTIONPREFIX+a.getName();
+    }
     public String toCNFParams(){
         //return Arrays.toString(params.toArray());
         String res ="";
@@ -101,7 +104,7 @@ public class AzioneGround implements Comparable<AzioneGround>
 
     String mkLitName()
     {
-        return getName()+toCNFParams();
+        return getCNFName()+toCNFParams();
     }
 
     @Override

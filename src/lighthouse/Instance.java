@@ -54,9 +54,10 @@ public class Instance
     private final int cacheLimit = 3;
     boolean noscript=false;
     private boolean postprocessed;
-    boolean nopostprocess;
     private Map<String,Integer> rev;
-    
+    private List<PredicateInst> goalsWithVar;
+    private List<PredicateInst> goalsWithoutVar;
+    private List<String> variablesInFinalState;
     TreeMap<String, Predicate> predicates = new TreeMap<>();
     public String name;
 
@@ -99,9 +100,39 @@ public class Instance
                 }
             }
         }
+        this.goalsWithVar = new LinkedList<>();
+        this.goalsWithoutVar = new LinkedList<>();
+        this.variablesInFinalState = new LinkedList<>();
+        this.variablesVolPreds(goalsWithVar, goalsWithoutVar, variablesInFinalState);
+
         postprocessed = true;
         
     }
+
+    public List<PredicateInst> getGoalsWithVar()
+    {
+        if(!postprocessed){
+            postprocess();
+        }
+        return goalsWithVar;
+    }
+
+    public List<PredicateInst> getGoalsWithoutVar()
+    {
+        if(!postprocessed){
+            postprocess();
+        }
+        return goalsWithoutVar;
+    }
+
+    public List<String> getVariablesInFinalState()
+    {
+        if(!postprocessed){
+            postprocess();
+        }
+        return variablesInFinalState;
+    }
+
     private int revSearch(String what){
         return rev.get(what);
     }
@@ -183,10 +214,8 @@ public class Instance
                 return searchArgs.get(0).equals(searchArgs.get(1));
             }
         }
-        if(!nopostprocess){
-            if(!postprocessed){
-                postprocess();
-            }
+        if(!postprocessed){
+            postprocess();
         }
         Predicate pred = predicates.get(searchPred);
         if(pred.getArity()<=cacheLimit){
@@ -213,6 +242,28 @@ public class Instance
     }
 
 
+    private void variablesVolPreds(List<PredicateInst> goalsWithVar,List<PredicateInst> goalsWithoutVar,  List<String> variables){
+        for(PredicateInst pi : finalState){
+            boolean hasVars = false;
+            //Find out if the final state has any variables and which
+            for(String p: pi.getParams()){
+                if(!isConstant(p)){
+                    hasVars = true;
+                    variables.add(p);
+                }
+                
+            }
+            //Save the fluents which appear with a variable in a final state
+            if(hasVars){
+                goalsWithVar.add(pi);
+            }
+            else{
+                goalsWithoutVar.add(pi);
+            }
+            }
+    }
+
+
     public String getName()
     {
         return name;
@@ -224,6 +275,7 @@ public class Instance
      * @param pi predicate instance to add to the initial state
      */
     public void addToInitial(PredicateInst pi){
+        postprocessed = false;
         if(pi.negated){
             throw new CloseWorldViolationError();
         }
@@ -257,8 +309,9 @@ public class Instance
      * @param num  arity
      * @throws DoubleDeclarationException if the predicate name was already declared
      */
-    public  void registerPredicate(String name, Integer num) throws DoubleDeclarationException
+    public  void registerPredicate(String name, int num) throws DoubleDeclarationException
     {
+        postprocessed = false;
         Predicate p = new Predicate (name,num);
         if(predicates.containsKey(name)){
             throw new DoubleDeclarationException();
@@ -284,6 +337,7 @@ public class Instance
         }
     }
     public void addFinal(PredicateInst what){
+        postprocessed = false;
         Predicate source = this.predicates.get(what.getName());
         what.setSource(source);
         this.finalState.add(what);
@@ -292,6 +346,7 @@ public class Instance
 
     public  void registerConstant(String c)
     {
+        postprocessed = false;
         constants.add(c);
     }
 
@@ -330,14 +385,15 @@ public class Instance
      * Add a new Action to the instance.
      * this method updates checks the post conditions of the Action
      * if a predicate appears in the post conditions it is considered a fluent from now on.
-     * @param actionName action name
-     * @param varList a list of variable names
-     * @param pre a list of preconditions
-     * @param post a list of postconditions
+     * @param actionName action name not null
+     * @param varList a list of variable names not null
+     * @param pre a list of preconditions not null
+     * @param post a list of postconditions not null
      * @throws UndeclaredPredicateException if a pre/postcondition makes use of a predicate which has not been declared.
      */
     public  void registerAction(String actionName, List<String> varList, List<PredicateInst> pre, List<PredicateInst> post) throws UndeclaredPredicateException
     {
+        postprocessed = false;
         for(PredicateInst p:pre){
             if(!existsPredicate(p.getName())){
                 throw new UndeclaredPredicateException(p.getName());

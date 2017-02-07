@@ -277,39 +277,26 @@ public class FilterAxioms
 
     public static Queue<PredicateInst> finalState(Instance i, SatPlanInstance spi,Report r){
         Queue<PredicateInst> fluentQueue = new java.util.ArrayDeque<>();
-        Set<String> variablesInTheFinalState = new TreeSet<>();
-        List<PredicateInst> volatilePredicates = new LinkedList<>();
-        for(PredicateInst pi : i.getFinalState()){
-            boolean hasVars = false;
-            //Find out if the final state has any variables and which
+        List<String> variablesInTheFinalState = i.getVariablesInFinalState();
+        List<PredicateInst> volatilePredicates = i.getGoalsWithVar();
+        for(PredicateInst pi : i.getGoalsWithoutVar()){
+            String name = pi.getName();
             for(String p: pi.getParams()){
-                if(i.isVariable(p)){
-                    hasVars = true;
-                    variablesInTheFinalState.add(p);
-                }
-                
+                name+=p;
             }
-            //Save the fluents which appear with a variable in a final state
-            if(hasVars){
-                volatilePredicates.add(pi);
-            }
-            else{
-                String name = pi.getName();
-                for(String p: pi.getParams()){
-                    name+=p;
-                }
-                fluentQueue.add(pi);
-                ////System.out.println(pi);
-                //make an and for the predicates which appear with a constant
-                Clause c = new Clause();
-                Literal l = new Literal(name,pi.isNegated(),TimeMarks.TN);
-                c.add(l);
-                c.verify();
-                spi.registerName(l);
-                spi.addClause(c);
-                r.putLeaf("Clause", c.toString(), "Assioma3");
-            }
+            fluentQueue.add(pi);
+            //make an and for the predicates which appear with a constant
+            Clause c = new Clause();
+            Literal l = new Literal(name,pi.isNegated(),TimeMarks.TN);
+            c.add(l);
+            c.verify();
+            spi.registerName(l);
+            spi.addClause(c);
+            r.putLeaf("Clause", c.toString(), "Assioma3");
         }
+
+
+        
         int numberOfVars = variablesInTheFinalState.size();
         ConstMult1 cm = new ConstMult1(numberOfVars,i.getConstants());
         TreeMap<String,Integer> map = new TreeMap<>();
@@ -318,7 +305,7 @@ public class FilterAxioms
             map.put(v,j);
             j+=1;
         }
-        String comPrefix = spi.getTempPrefixFrom("___final___");
+        String comPrefix = spi.getTempPrefixFrom(SatPlanSettings.FINALPREFIX);
         Clause bigOr = new Clause();
         int k = 0;
         while(cm.hasNext()){
@@ -373,20 +360,13 @@ public class FilterAxioms
         return fluentQueue;
     }
     public static String mkLitNameForCause(String s){
-        return "__cause__"+s;
+        return SatPlanSettings.CAUSEPREFIX+s;
     }
     public static String mkLitNameForAlready(String s){
-        return "__already__"+s;
+        return SatPlanSettings.ALREADYPREFIX+s;
     }
 
     
-    private static String mkLitNameForAction(String actionName, String [] c){
-        String res = "__action__" + actionName;
-        for(String co:c){
-            res+=co;
-        }
-        return res;
-    }
     
 }
    

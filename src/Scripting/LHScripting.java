@@ -75,6 +75,8 @@ public class LHScripting extends TwoArgFunction
         }
         
     }
+
+    
     class addConstant extends OneArgFunction {
 
         @Override
@@ -86,6 +88,9 @@ public class LHScripting extends TwoArgFunction
 
         
     }
+    /**
+     * terminates an interactive session
+     */
     class stopInteractive extends ZeroArgFunction {
 
         @Override
@@ -120,7 +125,7 @@ public class LHScripting extends TwoArgFunction
             LuaTable luaConsts = constants.checktable();
             for(LuaValue key : luaConsts.keys()){
                 LuaValue val = luaConsts.get(key);
-                String co = new String(val.tojstring());
+                String co = val.tojstring();
                 clist.add(co);
             }
             
