@@ -1,5 +1,5 @@
 c SAT encoding of the satplan problem
-c Generation time: 85 millisec
+c Generation time: 52 millisec
 c START DICTIONARY
 c ___action___crossgdb[1]=118
 c ___action___crossgdb[2]=119

@@ -18,6 +18,7 @@ package lighthouse;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  *
@@ -25,17 +26,25 @@ import java.util.HashMap;
  */
 public class Builtins
 {
-    private static final HashMap<String, VarArityPredicate> map = new HashMap<>();
+    private static final HashMap<String, VarArityPredicate> nameToCode = new HashMap<>();
+    private static final HashMap<String, Integer> nameToArity = new HashMap<>();
 
     static{
-        map.put("=", new Equality());
+        nameToCode.put("=", new Equality());
+        nameToArity.put("=", 2);
     }
-    
+    public static int getArity(String s){
+        return nameToArity.get(s);
+    }
     public static boolean isBuiltin(String s){
-        return map.containsKey(s);
+        return nameToCode.containsKey(s);
     }
     public static boolean test(String name, String ... args){
-        return map.get(name).test(args);
+        return nameToCode.get(name).test(args);
+    }
+
+    public static Set<String> getNames(){
+        return nameToCode.keySet();
     }
     
     static class Equality implements VarArityPredicate

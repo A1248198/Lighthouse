@@ -62,7 +62,9 @@ public final class Instance
     public Instance(){
         name="unknown";
         try {
-            registerPredicate("=",2);
+            for(String pn: Builtins.getNames()){
+                registerPredicate(pn,Builtins.getArity(pn));
+            }
         } catch (DoubleDeclarationException ex) {
             Logger.getLogger(Instance.class.getName()).log(Level.SEVERE, null, ex);
         }
