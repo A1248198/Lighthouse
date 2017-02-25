@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,9 +39,8 @@ import java.util.logging.Logger;
  * A planning instance
  * @author A1248198
  */
-public class Instance
+public final class Instance
 {
-    //public Set<PredicateInst> initialState = new TreeSet<>(PredicateInst.getComparator());
     public Set<PredicateInst> initialState = new HashSet<>();
     public Set<PredicateInst> finalState = new TreeSet<>(PredicateInst.getComparator());
     public List<String> constants = new ArrayList<>();
@@ -71,6 +68,11 @@ public class Instance
         }
         
     }
+    /**
+     * creates the cache to speedup the predicate checks
+     * every method which needs this cache to be ready has to check if postprocessed is true and call this method otherwise,
+     * every method which invalidates the cache must set postprocessed to false.
+     */
     private void postprocess(){
         int conNum = constants.size();
         int indices[] ;
@@ -206,13 +208,8 @@ public class Instance
         System.out.println(s);
     }
     public boolean isInInitialS(String searchPred, List<String> searchArgs){
-        if(searchPred.equals("=")){
-            if(searchArgs.size()!=2){
-                throw new RuntimeException();
-            }
-            else{
-                return searchArgs.get(0).equals(searchArgs.get(1));
-            }
+        if(Builtins.isBuiltin(searchPred)){
+            return Builtins.test(searchPred, searchArgs.toArray(new String[0]));
         }
         if(!postprocessed){
             postprocess();
