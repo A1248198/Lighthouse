@@ -73,9 +73,9 @@ public class LightHouse
         clo.addFlag("satplan", "generate a SATPLAN instance");
 		clo.addOption("dimacs-prefix", "prefix to use for dimacs file output", false);
 		clo.addOption("pddl-prefix", "prefix to use for pddl output",false);
-        clo.addOption("p","name of the domain file", true);
-	    clo.addOption("i", "name of the instance file", true);
-        clo.addOption("t", "generate satplan instances to find plans of max lenght t");
+        clo.addOption("domain","name of the domain file", true);
+	    clo.addOption("instance", "name of the instance file", true);
+        clo.addOption("maxt", "generate satplan instances to find plans of max lenght t");
         clo.addFlag("pddl", "generate pddl");
         clo.addFlag("nosolve", "dont use the sat solver");
         clo.addFlag("noscript", "disable script execution");
@@ -103,7 +103,7 @@ public class LightHouse
 
     private static void doSatPlan(CmdLineOptions clo,Instance instance){
         if(clo.isFlagSet("satplan")){
-            int t = Integer.parseInt( clo.getOptionValue("t"));
+            int t = Integer.parseInt( clo.getOptionValue("maxt"));
             SatPlanInstance spi = new SatPlanInstance();
             Report r = new Report();
             //Report r = new DummyReport();
@@ -115,23 +115,29 @@ public class LightHouse
             //Axioms.Axiom1(p.getInstance(),spi,r);
             spi.verify();
             String show = SatPlanSettings.ACTIONPREFIX+".*";
-            String prefix  = "cnf";
+            String prefix  = clo.getOptionValue("dimacs-prefix");
+            if(prefix == null){
+                prefix = "cnf";
+            }
+            boolean solve = !clo.isFlagSet("nosolve");
             for(int j = 2; j<=t+1; j+=1){
                 spi.encode2(prefix+(j-1),j);
                 boolean sat = false;
-                try {
-                    sat = sat4jSolve(prefix+(j-1),show);
-                } catch (ParseFormatException ex) {
-                    Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (ContradictionException ex) {
-                    Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (TimeoutException ex) {
-                    Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                if(sat){
-                    break;
+                if(solve){
+                    try {
+                        sat = sat4jSolve(prefix+(j-1),show);
+                    } catch (ParseFormatException ex) {
+                        Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ContradictionException ex) {
+                        Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ex) {
+                        Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (TimeoutException ex) {
+                        Logger.getLogger(LightHouse.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if(sat){
+                        break;
+                    }
                 }
             }
             PrintStream ps = null;
@@ -177,8 +183,8 @@ public class LightHouse
     private static Instance doParse(CmdLineOptions clo) throws FileNotFoundException, Exception{
         List<java.io.File> readers = new LinkedList<>();
         
-        String domainFileName = clo.getOptionValue("p");
-        String instanceFileName = clo.getOptionValue("i");
+        String domainFileName = clo.getOptionValue("domain");
+        String instanceFileName = clo.getOptionValue("instance");
         if(domainFileName == null ){
             throw new RuntimeException("missing domain filename");
         }

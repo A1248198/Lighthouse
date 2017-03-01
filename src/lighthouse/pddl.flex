@@ -84,7 +84,7 @@ LCNAME = [a-z][a-z0-9]*
 ANYCASENAME = [A-Za-z=][A-Za-z0-9]*
 NUMBER = 0 | [1-9][0-9]*   
 LUATEXT = [^$]+
-RESERVED = "__"
+RESERVED = "___"
 %%
 <YYINITIAL> {RESERVED} { throw new ReservedSequenceException(yytext()); }
 <YYINITIAL> "initial" { return symbol(sym.INITIAL); }   

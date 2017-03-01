@@ -35,7 +35,7 @@ public class XMLTreeView {
             show(null);
        }
        public static void show(File xml){
-              JFrame frame = new JFrame("XMLTreeView");
+              JFrame frame = new JFrame("Lighthouse Expolorer");
               frame.setSize(400,400);
               
               frame.addWindowListener(new WindowAdapter(){

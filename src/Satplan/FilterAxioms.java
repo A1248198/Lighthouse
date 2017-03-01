@@ -275,8 +275,7 @@ public class FilterAxioms
         }
     }
 
-    public static Queue<PredicateInst> finalState(Instance i, SatPlanInstance spi,Report r){
-        Queue<PredicateInst> fluentQueue = new java.util.ArrayDeque<>();
+    public static void finalState(Instance i, SatPlanInstance spi,Report r){
         List<String> variablesInTheFinalState = i.getVariablesInFinalState();
         List<PredicateInst> volatilePredicates = i.getGoalsWithVar();
         for(PredicateInst pi : i.getGoalsWithoutVar()){
@@ -284,7 +283,6 @@ public class FilterAxioms
             for(String p: pi.getParams()){
                 name+=p;
             }
-            fluentQueue.add(pi);
             //make an and for the predicates which appear with a constant
             Clause c = new Clause();
             Literal l = new Literal(name,pi.isNegated(),TimeMarks.TN);
@@ -332,7 +330,6 @@ public class FilterAxioms
                 }
                 PredicateInst finalFluent = new PredicateInst(pi.getName(),al,pi.isNegated());
                 finalFluent.setSource(pi.getSource());
-                fluentQueue.add(pi);
                 TimeMarks tm;
                 if(pi.isFluent()){
                     tm = TN;
@@ -357,7 +354,6 @@ public class FilterAxioms
             r.putLeaf("Clause", bigOr.toString(), "Assioma3");
             
         }
-        return fluentQueue;
     }
     public static String mkLitNameForCause(String s){
         return SatPlanSettings.CAUSEPREFIX+s;
