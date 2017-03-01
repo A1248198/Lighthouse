@@ -173,7 +173,7 @@ public class FilterAxioms
                 Literal actionPositive = new Literal(act.mkLitName(),false,T);
                 Literal actionNegative = new Literal(act.mkLitName(),true,T);
                 if(act.causes(positive)){
-                    causeFormula.put(new Leaf(act.toFormulaName()+act.toFormulaParams(),T), 0,2);
+                    causeFormula.put(new Leaf(act.getName()+act.toFormulaParams(),T), 0,2);
                     Clause azioneImplicaCausa = new Clause();
                     azioneImplicaCausa.add(causePositive);
                     azioneImplicaCausa.add(actionNegative);
