@@ -7,9 +7,9 @@ all: Parser.java Lexer.java
 clean:
 	rm Lexer.java Parser.java
 
-Parser.java: pddl.cup
-	$(JAVA) -jar java-cup-11b.jar -package lighthouse -expect 6000 -parser Parser pddl.cup
+Parser.java: lh.cup
+	$(JAVA) -jar java-cup-11b.jar -package lighthouse -expect 6000 -parser Parser lh.cup
 
-Lexer.java: pddl.flex
-	$(JAVA) -jar jflex-1.6.1.jar pddl.flex
+Lexer.java: lh.flex
+	$(JAVA) -jar jflex-1.6.1.jar lh.flex
 
