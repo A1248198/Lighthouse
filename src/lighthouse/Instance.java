@@ -19,7 +19,7 @@ package lighthouse;
 import LHExceptions.CloseWorldViolationError;
 import LHExceptions.DoubleDeclarationException;
 import LHExceptions.UndeclaredPredicateException;
-import Scripting.Interactive;
+import Scripting.ScriptEngine;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -184,7 +184,7 @@ public final class Instance
         }
         //System.out.println("running scripts");
         try {
-            Interactive.RunScripts(this);
+            ScriptEngine.RunScripts(this);
         } catch (IOException ex) {
             Logger.getLogger(Instance.class.getName()).log(Level.SEVERE, null, ex);
         }

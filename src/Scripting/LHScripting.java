@@ -67,7 +67,7 @@ public class LHScripting extends TwoArgFunction
         public LuaValue call()
         {
             try {
-                Interactive.interactive(i);
+                ScriptEngine.interactive(i);
             } catch (IOException ex) {
                 Logger.getLogger(LHScripting.class.getName()).log(Level.SEVERE, null, ex);
             }

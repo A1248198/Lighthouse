@@ -5,7 +5,6 @@ import java_cup.runtime.*;
 import java.util.List;
 import java.util.LinkedList;
 import lighthouse.Instance;
-import lighthouse.LHType;
 import lighthouse.Predicate;
 import LHExceptions.ParserExceptions.*;
 //parser code {:
@@ -123,12 +122,15 @@ non terminal initialdecl;
 non terminal constantsdecl;
 non terminal List<String> mixlist;
 non terminal script;
+non terminal runscripts;
 non terminal fileBreak;
 start with PDDL;
 
+runscripts ::=
+{:i.runScripts();:};
 script ::=
 {::}|
- SCRIPTBOUND SCRIPTCODE:code SCRIPTBOUND {:System.out.println(code);i.addScript(code);i.runScripts();:};
+ SCRIPTBOUND SCRIPTCODE:code SCRIPTBOUND {:System.out.println(code);i.addScript(code);:};
 
 predicatesdecl ::= PREDICATES COL predicateDeclarationList SEMI {::}
                 |  PREDICATES  predicateDeclarationList SEMI {:warningMissing(":"); :}
@@ -197,7 +199,7 @@ fileBreak ::= MANEOF {:
 ;
 
 PDDL ::= //script constantsdecl script predicatesdecl initialdecl finaldecl actiondecl
-        script predicatesdecl actiondecl fileBreak script constantsdecl initialdecl finaldecl script
+        script runscripts predicatesdecl actiondecl fileBreak script constantsdecl initialdecl finaldecl script runscripts
 //      | constantsdecl predicatesdecl initialdecl finaldecl actiondecl 
 //      | predicatesdecl constantsdecl initialdecl finaldecl actiondecl
 //      | predicatesdecl constantsdecl finaldecl initialdecl actiondecl

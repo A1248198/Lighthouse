@@ -54,7 +54,6 @@ public class LightHouse
      */
     
     
-//run with --satplan --pddl --p test_1.lhd --i test_1.lhp --log result --dimacs-prefix sat --t 5
     
     public static void main(String[] args) throws FileNotFoundException, Exception
     {

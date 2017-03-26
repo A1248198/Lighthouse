@@ -36,7 +36,7 @@ import org.luaj.vm2.lib.jse.JsePlatform;
  *
  * @author A1248198
  */
-public class Interactive
+public class ScriptEngine
 {
     private static Globals globals;
     private static boolean print = false;
