@@ -1,9 +1,6 @@
 predicates:
     on/2, clear/1,ontable/1
 ;
-
-
-
 actions:
     movetoblock(x,y,z){//move block x from y to z
         pre: on(x,y),-=(y,z),-=(x,z),clear(z),clear(x);

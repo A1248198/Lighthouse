@@ -1,0 +1,21 @@
+$$$
+mkInteger('int',0,5)
+--interactive()
+$$$
+
+constants:
+    A,B
+;
+initial:
+    bucket(A),bucket(B),  capacity(A,int5),capacity(B,int3),
+    contains(A,int0),contains(B,int0)
+;
+
+final:
+    contains(A,int4),-pulled(),-working()
+;
+
+$$$
+
+--mkEquals()
+$$$

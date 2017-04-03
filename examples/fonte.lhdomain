@@ -1,0 +1,31 @@
+$$$
+dofile("Scripts/integers.lua")
+uses('sum')
+uses('leq')
+$$$
+
+predicates:
+    contains/2, capacity/2,bucket/1
+;
+
+
+
+actions:
+    pourAndStopBecauseFull(from,to,fromqty,fromqtynext,toqty,tocap,moved){
+        pre: bucket(from),bucket(to),-=(from,to),contains(from,fromqty),contains(to,toqty),capacity(to,tocap),sum(fromqtynext,moved,fromqty),sum(toqty,moved,tocap),leq(moved,fromqty);
+        post: contains(to,tocap),-contains(to,toqty),-contains(from,fromqty),contains(from,fromqtynext);
+}
+    pourAndStopBecauseEmpty(from,to,fromqty,toqty,tocap,toqtynext){
+        pre: bucket(from),bucket(to),-=(from,to),contains(from,fromqty),contains(to,toqty),leq(toqtynext,tocap),sum(toqty,fromqty,toqtynext),capacity(to,tocap);
+        post: contains(to,toqtynext),-contains(to,toqty),-contains(from,fromqty),contains(from,int0);
+}
+    fill(what,whatqty,whatcap){
+        pre:bucket(what),integer(whatcap),integer(whatqty), contains(what,whatqty),capacity(what,whatcap);
+        post:-contains(what,whatqty),contains(what,whatcap);
+    }
+    empty(what,whatqty){
+        pre:bucket(what),integer(whatqty), contains(what,whatqty);
+        post:-contains(what,whatqty),contains(what,int0);
+    } 
+
+;
