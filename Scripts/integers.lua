@@ -2,39 +2,104 @@
 
 addPredicate('integer',1)
 addPredicate('zero',1)
-addPredicate('succ',2)
+initialized = false
+intPrefix = ''
+intFrom = 0
+intTo = 0
+intOldUses = uses
 
+function uses(what)
+    if( what == 'succ') then
+        addPredicate('succ',2)
+    elseif( what == 'less') then
+        addPredicate('less',2)
+    elseif( what == 'leq') then
+        addPredicate('leq',2)
+    elseif( what == 'sum') then
+        addPredicate('sum',3)
+    end
+    
+    intOldUses(what)
 
-function mkInteger(prefix, upto)
-    if(upto < 0 ) then
-        error("upto should not be negative")
+end
+    
+function getName(i)
+    if (i < 0 ) then
+        return intPrefix .. 'minus'..(0- i)
+    else
+        return intPrefix..i
     end
-    for i=0, upto do
-        name =  prefix .. i
-        addConstant(name)
-        setInitial('integer',{name})
-    end
-    setInitial('zero', {prefix .. 0})
 end
 
-function lessUpTo(prefix, upto)
-    if(upto < 0 ) then
-        error("upto should not be negative")
+function mkInteger(prefix,from,to)
+    if(to < from ) then
+        error("to should not be less than from")
     end
-    addPredicate('less',2)
-    for i=0, upto  do
+    intPrefix = prefix
+    intFrom = tonumber(from)
+    intTo = tonumber(to)
+    for i=from, to do
+        name =  getName(i)
+        addConstant(getName(i))
+        setInitial('integer',{getName(i)})
+    end
+    if( from <= 0 and to >=0 ) then
+        setInitial('zero', {prefix .. 0})
+    end
+    initialized = true
+    if(isNeeded('less')) then
+        mkLess()
+    end
+    if(isNeeded('leq')) then
+        mkLeq()
+    end
+    if(isNeeded('succ')) then
+        mkSucc()
+    end
+    if(isNeeded('sum')) then
+        mkSum()
+    end
+    
+end
+
+function mkLess()
+    if(not initialized) then
+        error("you should run mkInteger first")
+    end
+    for i=intFrom, intTo  do
         for j=0, i-1 do
-            setInitial('less',{prefix..j,prefix..i})
+            setInitial('less',{getName(j),getName(i)})
         end
     end
 end
 
-function mkSucc(prefix,upto)
-    if(upto < 0 ) then
-        error("upto should not be negative")
+function mkLeq()
+    if(not initialized) then
+        error("you should run mkInteger first")
     end
-    addPredicate('succ',2)
-    for i = 0, upto -1 do
-        setInitial('succ',{prefix..i,prefix..(i+1)})
+    for i=intFrom, intTo  do
+        for j=0, i do
+            setInitial('leq',{getName(j),getName(i)})
+        end
+    end
+end
+function mkSum()
+    if(not initialized) then
+        error("you should run mkInteger first")
+    end
+    for i = intTo, intFrom ,-1 do
+        for j = i, intFrom , -1 do
+            setInitial('sum',{getName(j),getName(i-j),getName(i)})
+            setInitial('sum',{getName(i-j),getName(j),getName(i)})
+        end
+    end
+end
+
+function mkSucc()
+    if(not initialized) then
+        error("you should run mkInteger first")
+    end
+    for i = intFrom, (intTo - 1) do
+        setInitial('succ',{getName(i),getName(i+1)})
     end
 end

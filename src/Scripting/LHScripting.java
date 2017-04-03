@@ -203,5 +203,15 @@ public class LHScripting extends TwoArgFunction
 
         
     }
+
+
+    public static final String LuaInitScript = ""
+            + "lhPredicatesNeeded={}\n"
+            + "function uses(what)\n"
+            + "     lhPredicatesNeeded[what] = true\n"
+            + "end\n"
+            + "function isNeeded(what)\n"
+            + "     return lhPredicatesNeeded[what]==true\n"
+            + "end\n";
     
 }

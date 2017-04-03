@@ -55,8 +55,8 @@ public class ScriptEngine
          LHScripting.i = i;
          LHScripting.g = globals;
          loadLibrary("Scripting.LHScripting");
-         //LuaValue c = globals.loadfile("Scripts/integers.lua");
-         //c.call();
+         LuaValue c = globals.load(LHScripting.LuaInitScript);
+         c.call();
     }
     public static void loadNCall(String filename){
         LuaValue chunk = globals.loadfile(filename);

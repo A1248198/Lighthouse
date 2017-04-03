@@ -16,6 +16,7 @@
  */
 package lighthouse;
 
+import Report.DummyReport;
 import Report.Report;
 import Satplan.FilterAxioms;
 import Satplan.SatPlanInstance;
@@ -78,6 +79,7 @@ public class LightHouse
         clo.addFlag("pddl", "generate pddl");
         clo.addFlag("nosolve", "dont use the sat solver");
         clo.addFlag("noscript", "disable script execution");
+        clo.addFlag("noreport", "disable report generation");
         clo.addOption("log", "filename for log file in xml format");
         clo.addFlag("show", "show the resulting xml");
 		// Parses the command-line arguments. It raises an error in case mandatory options are not given
@@ -104,8 +106,14 @@ public class LightHouse
         if(clo.isFlagSet("satplan")){
             int t = Integer.parseInt( clo.getOptionValue("maxt"));
             SatPlanInstance spi = new SatPlanInstance();
-            Report r = new Report();
-            //Report r = new DummyReport();
+            //Report r = new Report();
+            Report r;
+            if(clo.isFlagSet("noreport")){
+                r= new DummyReport();
+            }
+            else{
+                r = new Report();
+            }
             //Axioms.i=p.getInstance();
             //Axioms.Axiom2(p.getInstance(),spi,r);
             //Axioms.Axiom3(p.getInstance(),spi,r);

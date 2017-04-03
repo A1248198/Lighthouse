@@ -6,3 +6,4 @@ sat*
 report.xml
 result.xml
 *.pddl
+.swp
