@@ -124,6 +124,9 @@ non terminal List<String> mixlist;
 non terminal script;
 non terminal runscripts;
 non terminal fileBreak;
+non terminal optSemi;
+non terminal optLCurly;
+non terminal optRCurly;
 start with PDDL;
 
 runscripts ::=
@@ -132,9 +135,19 @@ script ::=
 {::}|
  SCRIPTBOUND SCRIPTCODE:code SCRIPTBOUND {:System.out.println(code);i.addScript(code);:};
 
-predicatesdecl ::= PREDICATES COL predicateDeclarationList SEMI {::}
-                |  PREDICATES  predicateDeclarationList SEMI {:warningMissing(":"); :}
-                |  PREDICATES  error SEMI {: error("syntax error in the predicate declaration"); :}
+optSemi ::= SEMI {::}
+          | {:warningMissing(";");:}
+;
+optLCurly ::= LCURLY {::}
+            | {:warningMissing("{");:}
+;
+optRCurly ::= RCURLY {::}
+            | {:warningMissing("}");:}
+;
+
+predicatesdecl ::= PREDICATES COL predicateDeclarationList optSemi {::}
+                |  PREDICATES  predicateDeclarationList optSemi {:warningMissing(":"); :}
+                |  PREDICATES  error optSemi {: error("syntax error in the predicate declaration"); :}
 ;
 
 predicateDeclarationList ::= predicateDeclarationList COMMA predicateDeclaration
@@ -149,15 +162,15 @@ predicateDeclaration ::= ID:name SLASH NUMBER:num
 
 
 
-initialdecl ::= INITIAL COL predicates:pcs SEMI 
+initialdecl ::= INITIAL COL predicates:pcs optSemi 
 {:  i.setInitial(pcs); :}
 ;
 
-finaldecl ::= FINAL COL predicates:p SEMI
+finaldecl ::= FINAL COL predicates:p optSemi
 {: i.setFinal(p); :}
 ;
 
-constantsdecl ::= CONSTANTS COL mixlist:cl SEMI
+constantsdecl ::= CONSTANTS COL mixlist:cl optSemi
 {:  for (String c : cl){ i.registerConstant(c); } :}
 ;
 
@@ -174,22 +187,22 @@ mixlist ::= mixlist:m COMMA ID:c {:RESULT = m ; m.add(c);:}
           | ID:id {: RESULT = new LinkedList<>(); RESULT.add(id); :}
 ;
 
-actiondecl ::= ACTIONS COL actionlist SEMI
-            |  ACTIONS actionlist SEMI {: warningMissing(":"); :}
-            //|  ACTIONS COL error SEMI {: error("error in the actions declarations"); :}
+actiondecl ::= ACTIONS COL actionlist optSemi
+            |  ACTIONS actionlist optSemi {: warningMissing(":"); :}
+            //|  ACTIONS COL error optSemi {: error("error in the actions declarations"); :}
 ;
 actionlist ::= actionlist actiond
             | actiond
 ;
-actiond ::= ID:actionName LPAREN mixlist:varList RPAREN LCURLY precond:pre postcond:post RCURLY
+actiond ::= ID:actionName LPAREN mixlist:varList RPAREN optLCurly precond:pre postcond:post optRCurly
         {: i.registerAction(actionName,varList,pre,post); :}
-        | ID:actionName LPAREN  RPAREN LCURLY precond:pre postcond:post RCURLY
+        | ID:actionName LPAREN  RPAREN optLCurly precond:pre postcond:post optRCurly
         {: i.registerAction(actionName,null,pre,post); :}
 ;
-precond ::= PRE COL predicates:pp SEMI {: RESULT = pp; :}
-          | PRE COL  SEMI {:RESULT = new LinkedList<PredicateInst>();:}
+precond ::= PRE COL predicates:pp optSemi {: RESULT = pp; :}
+          | PRE COL  optSemi {:RESULT = new LinkedList<PredicateInst>();:}
 ;
-postcond ::= POST COL predicates:pp SEMI {: RESULT = pp; :}
+postcond ::= POST COL predicates:pp optSemi {: RESULT = pp; :}
 
 ;
 

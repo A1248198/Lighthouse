@@ -67,7 +67,7 @@ public class LightHouse
 "ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\n" +
 "WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\n" +
 "ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF\n" +
-"OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\n\n\n"+"if in doubt try: --satplan --pddl --p examples/test.lhdomain --i examples/test.lhinstance --show  --dimacs-prefix sat --t 5");
+"OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\n\n\n"+"if in doubt try: --satplan --pddl --domain examples/test.lhdomain --instance examples/test.lhinstance --show  --dimacs-prefix sat --maxt 5");
 		
 		// Second argument = true iff the option is mandatory. Default: false.
         clo.addFlag("satplan", "generate a SATPLAN instance");
