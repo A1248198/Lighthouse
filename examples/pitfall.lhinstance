@@ -1,0 +1,15 @@
+$$$
+mkInteger('int',0,10)
+$$$
+
+constants:
+;
+initial:
+;
+
+final:
+    won()
+;
+
+$$$
+$$$

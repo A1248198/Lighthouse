@@ -90,6 +90,7 @@ public class LightHouse
         clo.addOption("log", "filename for log file in xml format");
         clo.addFlag("show", "show the resulting xml");
         clo.addFlag("benchmark", "run only benchmarks");
+        clo.addFlag("benchmark2", "run only run detailed benchmark");
         clo.addFlag("hybrid", "use hybrid method");
 		// Parses the command-line arguments. It raises an error in case mandatory options are not given
 		clo.parse(args);
@@ -106,6 +107,10 @@ public class LightHouse
         System.out.println(instance.getString());
         if(clo.isFlagSet("benchmark")){
             doBenchmarks(clo,instance);
+            return;
+        }
+        if(clo.isFlagSet("benchmark2")){
+            doBenchmarks2(clo,instance);
             return;
         }
         doPDDL(clo,instance);
@@ -158,11 +163,11 @@ public class LightHouse
        System.out.println("++++++++++++++++++++++++++++++++");
 
        
-       //si.clauses.removeAll(fi.clauses);
-       //System.out.println(si.clauses.size());
-       //for(Clause c:si.clauses){
-       //    System.out.println(c);
-       //}
+       si.clauses.removeAll(fi.clauses);
+       System.out.println(si.clauses.size());
+       for(Clause c:si.clauses){
+           System.out.println(c);
+       }
        //Set<AzioneGround> fmh = new HashSet<>();
        //fmh.addAll(filActGr);
        //fmh.removeAll(hyActGro);

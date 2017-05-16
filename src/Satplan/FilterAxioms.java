@@ -71,6 +71,7 @@ public class FilterAxioms
         
     }
     private static void assioma2(Map<String,PredicateInst>fluenti,Instance i, SatPlanInstance spi,Report r){
+        System.out.println("========Assioma2=========");
         for(PredicateInst fluente:fluenti.values()){
             PredicateInst positive = fluente.mkPosClone();
             boolean negated;
@@ -84,10 +85,12 @@ public class FilterAxioms
             Literal lit = new Literal(fluente.mkLiteralName(),negated,T0);
             clause.add(lit);
             spi.addClause(clause);
+            System.out.println(clause);
             r.putLeaf("Clause", clause.toString(), "Assioma2",fluente.getName());
                 
         }
         
+        System.out.println("=+=+=+=====Assioma2======+=+=+=");
     }
     
     private static Formula mkAssioma4Formula(String name){
@@ -202,6 +205,9 @@ public class FilterAxioms
                 }
 
             }
+            //if(causeOr.numLiterals()==1){
+            //    throw new RuntimeException(causeOr.toString());
+            //}
             spi.addClause(causeOr);
             spi.addClause(alreadyOr);
             r.putLeaf("Clause", causeOr.toString(), "Assioma4",pred.getName(),pred.toParamString());

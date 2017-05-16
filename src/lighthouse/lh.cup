@@ -164,6 +164,7 @@ predicateDeclaration ::= ID:name SLASH NUMBER:num
 
 initialdecl ::= INITIAL COL predicates:pcs optSemi 
 {:  i.setInitial(pcs); :}
+| INITIAL COL optSemi
 ;
 
 finaldecl ::= FINAL COL predicates:p optSemi
@@ -172,6 +173,7 @@ finaldecl ::= FINAL COL predicates:p optSemi
 
 constantsdecl ::= CONSTANTS COL mixlist:cl optSemi
 {:  for (String c : cl){ i.registerConstant(c); } :}
+| CONSTANTS COL optSemi
 ;
 
 predicates ::= predicates:pp COMMA predicate:p {: RESULT = pp; pp.add(p); :}

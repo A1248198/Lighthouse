@@ -70,6 +70,9 @@ public class Clause
     public boolean isDynamic(){
         return dynamic;
     }
+    public int numLiterals(){
+        return this.literalList.size();
+    }
     public boolean add(Literal l){
         if(l.dynamic()){
             dynamic = true;

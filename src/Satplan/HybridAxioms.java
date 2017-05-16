@@ -65,37 +65,29 @@ public class HybridAxioms
         Set<PredicateInst> fluentiEsplorati =  new HashSet<>();
         Set<AzioneGround> azioniEsplorate = new HashSet<>();
         int iterations=0;
-        int runs = 0;
         long start = System.currentTimeMillis();
         System.out.println(fluentQueue);
-        int ring = fluentQueue.size();
         while(!fluentQueue.isEmpty()){
-            if(ring==0){
-                System.out.println(fluentQueue);
-                ring = fluentQueue.size();
-            }
-            runs+=1;
+            //System.out.println(iterations);
             PredicateInst fg = fluentQueue.poll();
+            if(fluentiEsplorati.contains(fg)){
+                //System.out.println("repetiotion"+fg);
+                ;
+            }
+            else{
+                findAllGrounddActionsLeadingTo(actionQueue,azioniEsplorate,i,spi,r,fg);
+                
+                fluentiEsplorati.add(fg);
+
+                assioma5(actionQueue,secondFluentQueue,azioniEsplorate,fluentiEsplorati,i,spi,r);
+            }
             if(fluentQueue.isEmpty()){
                 iterations+=1;
                 fluentQueue = secondFluentQueue;
                 secondFluentQueue = new java.util.ArrayDeque<>();
+                System.out.println(fluentQueue);
             }
-            if(fluentiEsplorati.contains(fg)){
-                //System.out.println("repetiotion"+fg);
-                continue;
-            }
-            findAllGrounddActionsLeadingTo(actionQueue,azioniEsplorate,i,spi,r,fg);
-            fluentiEsplorati.add(fg);
-
-            assioma5(actionQueue,secondFluentQueue,azioniEsplorate,fluentiEsplorati,i,spi,r);
             //System.out.println(String.format("Actions:%d,Fluents:%d,Queue:%d,Iteration:%d,current: %s", azioniEsplorate.size(),fluentiEsplorati.size(),fluentQueue.size(),iterations,fg.toString()));
-            if(runs%100==0){
-                Set<PredicateInst> intersection = new HashSet<>(i.initialState);
-                intersection.retainAll(fluentiEsplorati);
-                System.out.println(String.format("Runs:%d,found:%d", runs,intersection.size()));
-            }
-            ring -=1;
         }
         Map<String,PredicateInst> nomiFluenti = assioma4(azioniEsplorate,fluentiEsplorati,i,spi,r);
         assioma2(nomiFluenti,i,spi,r);
@@ -282,6 +274,7 @@ public class HybridAxioms
                     ////System.out.println("prec:::::"+prec.toString());
                     if(!fluentiEsplorati.contains(prec)){
                         if(!fluentQueue.contains(prec))
+                            //System.out.println(fluentQueue);
                             fluentQueue.add(prec);//possible fluent discovery
                     }
                     Literal l2 = prec.mkLiteral(TimeMarks.T);

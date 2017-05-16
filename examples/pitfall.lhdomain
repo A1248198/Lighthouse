@@ -1,0 +1,17 @@
+$$$
+dofile("Scripts/integers.lua")
+uses("leq")
+$$$
+
+predicates:
+    won/0
+;
+
+
+
+actions:
+    win(x,y,z,k){
+    pre:leq(x,y);
+    post:won()
+    }
+;
