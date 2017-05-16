@@ -20,6 +20,7 @@ import NCNF.*;
 import static NCNF.OpType.*;
 import Report.Report;
 import static Satplan.TimeMarks.*;
+import Stat.Stat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +40,11 @@ public class FilterAxioms
 {
  
     
-    public static void mkSatPlan(Instance i, SatPlanInstance spi, Report r){
+    //public static void mkSatPlan(Instance i, SatPlanInstance spi, Report r){
+    //    mkSatPlan(i,spi,r,null);
+    //}
+    public static Set<AzioneGround> mkSatPlan(Instance i, SatPlanInstance spi, Report r,Stat stat){
+        long start  = System.currentTimeMillis();
         finalState(i,spi,r);
         Set<PredicateInst> fluentiEsplorati =  new HashSet<>();
         Set<AzioneGround> azioniEsplorate = new HashSet<>();
@@ -58,6 +63,11 @@ public class FilterAxioms
             System.out.println(p);
             r.putLeaf("Fluente", p.mkLiteralName(), "Assioma1","Fluenti");
         }
+        int timetaken = (int)(System.currentTimeMillis()-start);
+        if(stat!=null){
+            stat.report("Filter", azioniEsplorate.size(), timetaken, spi.numClauses());
+        }
+        return azioniEsplorate;
         
     }
     private static void assioma2(Map<String,PredicateInst>fluenti,Instance i, SatPlanInstance spi,Report r){

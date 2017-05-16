@@ -60,8 +60,19 @@ public class ActionFactory
         System.out.println(s);
     }
     public AzioneGround get(){
-        return getex();
-        
+        try{
+            return getex();
+        }
+        catch(Exception e){
+            debug = true;
+            return getex();
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ActionFactory{" + "action=" + action + ", unification=" + unification + '}';
     }
     public AzioneGround getex(){
         String back[] = new String[action.getArity()];

@@ -20,6 +20,7 @@ import Satplan.*;
 import LHExceptions.EmptyClauseException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -31,6 +32,34 @@ public class Clause
     public boolean dynamic=false;
     public Clause(){
         literalList = new LinkedList<>();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 71 * hash + Objects.hashCode(this.literalList);
+        hash = 71 * hash + (this.dynamic ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Clause other = (Clause) obj;
+        boolean equ = true;
+        for(Literal l:this.literalList){
+            if(!other.literalList.contains(l)){
+                equ = false;
+            }
+        }
+        return equ;
     }
     public boolean add(Literal ...l){
         for(Literal ll :l){

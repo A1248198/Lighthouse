@@ -94,6 +94,9 @@ public class SatPlanInstance
         }
         clauses.add(c);
     }
+    public int numClauses(){
+        return this.clauses.size();
+    }
     public boolean verify(){
         for(Clause c:  this.clauses){
             for(Literal l :c.literalList){

@@ -20,6 +20,7 @@ import NCNF.*;
 import static NCNF.OpType.*;
 import Report.Report;
 import static Satplan.TimeMarks.*;
+import Stat.Stat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +58,7 @@ public class HybridAxioms
 
  
     
-    public static void abc(Instance i, SatPlanInstance spi, Report r){
+    public static Set<AzioneGround> mkSatPlan(Instance i, SatPlanInstance spi, Report r,Stat stat){
         Queue<PredicateInst> fluentQueue = finalState(i,spi,r);
         Queue<AzioneGround> actionQueue = new java.util.ArrayDeque<>();
         Queue<PredicateInst> secondFluentQueue = new java.util.ArrayDeque<>();
@@ -65,7 +66,14 @@ public class HybridAxioms
         Set<AzioneGround> azioniEsplorate = new HashSet<>();
         int iterations=0;
         int runs = 0;
+        long start = System.currentTimeMillis();
+        System.out.println(fluentQueue);
+        int ring = fluentQueue.size();
         while(!fluentQueue.isEmpty()){
+            if(ring==0){
+                System.out.println(fluentQueue);
+                ring = fluentQueue.size();
+            }
             runs+=1;
             PredicateInst fg = fluentQueue.poll();
             if(fluentQueue.isEmpty()){
@@ -77,7 +85,7 @@ public class HybridAxioms
                 //System.out.println("repetiotion"+fg);
                 continue;
             }
-            findAllActionsLeadingTo(actionQueue,azioniEsplorate,i,spi,r,fg);
+            findAllGrounddActionsLeadingTo(actionQueue,azioniEsplorate,i,spi,r,fg);
             fluentiEsplorati.add(fg);
 
             assioma5(actionQueue,secondFluentQueue,azioniEsplorate,fluentiEsplorati,i,spi,r);
@@ -87,6 +95,7 @@ public class HybridAxioms
                 intersection.retainAll(fluentiEsplorati);
                 System.out.println(String.format("Runs:%d,found:%d", runs,intersection.size()));
             }
+            ring -=1;
         }
         Map<String,PredicateInst> nomiFluenti = assioma4(azioniEsplorate,fluentiEsplorati,i,spi,r);
         assioma2(nomiFluenti,i,spi,r);
@@ -96,6 +105,13 @@ public class HybridAxioms
         for(PredicateInst p:fluentiEsplorati){
             System.out.println(p);
         }
+        int timeTaken = (int)(System.currentTimeMillis()-start);
+        
+        if(stat!= null){
+            stat.report("Hybrid", azioniEsplorate.size(), timeTaken, spi.numClauses());
+            System.out.println("Hybrid, "+ azioniEsplorate.size()+" actions, "+ timeTaken+ "ms, " +spi.numClauses());
+        }
+        return azioniEsplorate;
         
     }
     private static void assioma2(Map<String,PredicateInst>fluenti,Instance i, SatPlanInstance spi,Report r){
@@ -265,7 +281,8 @@ public class HybridAxioms
                 for(PredicateInst prec: precs){
                     ////System.out.println("prec:::::"+prec.toString());
                     if(!fluentiEsplorati.contains(prec)){
-                        fluentQueue.add(prec);//possible fluent discovery
+                        if(!fluentQueue.contains(prec))
+                            fluentQueue.add(prec);//possible fluent discovery
                     }
                     Literal l2 = prec.mkLiteral(TimeMarks.T);
                     Clause c = new Clause();
@@ -283,7 +300,7 @@ public class HybridAxioms
         
         }
     }
-    public static void findAllActionsLeadingTo(Queue<AzioneGround>actionQueue,Set<AzioneGround> esplorati,Instance i, SatPlanInstance spi, Report r, PredicateInst current){
+    public static void findAllGrounddActionsLeadingTo(Queue<AzioneGround>actionQueue,Set<AzioneGround> esplorati,Instance i, SatPlanInstance spi, Report r, PredicateInst current){
         for(Action act: i.getActions()){
             //System.out.println(act.name);
             List<Map<String,String>> unifications = new LinkedList<>();
@@ -294,6 +311,7 @@ public class HybridAxioms
             else{
                 where = act.postPos;
             }
+            //boolean relevant = false;
             for(PredicateInst pred:where){
                 //System.out.print(pred);
                 if(pred.getName().equals(current.getName())){
@@ -311,18 +329,28 @@ public class HybridAxioms
                     }
                     Map<String,String> map = new HashMap<>();
                     for(int j = 0;j<pred.getArity();j+=1){
-                        map.put(pred.getParam(j), current.getParam(j));
+                        if(!i.isConstant(pred.getParam(j))){
+                            map.put(pred.getParam(j), current.getParam(j));
+                        }
                     }
                     unifications.add(map);
                 }
             }
-            if(unifications.isEmpty()){
-                unifications.add(new HashMap());
-            }
+            //if(unifications.isEmpty()){
+            //    unifications.add(new HashMap());
+            //}
             for(Map<String,String> unification:unifications){
                 ActionFactory af = new ActionFactory(act,i,unification);
                 while(af.hasNext()){
-                    AzioneGround ag = af.get();
+                    AzioneGround ag;
+                    try{
+                        ag = af.get();
+                    }
+                    catch(Exception e){
+                        System.err.println(af.toString());
+                        System.err.println(current);
+                        throw e;
+                    }
                     if(ag!=null){
                         ////System.out.println(ag.toString());
                         if(!esplorati.contains(ag)){
@@ -419,7 +447,7 @@ public class HybridAxioms
                 }
                 PredicateInst finalFluent = new PredicateInst(pi.getName(),al,pi.isNegated());
                 finalFluent.setSource(pi.getSource());
-                fluentQueue.add(pi);
+                fluentQueue.add(finalFluent);
                 TimeMarks tm;
                 if(pi.isFluent()){
                     tm = TN;
@@ -447,15 +475,15 @@ public class HybridAxioms
         return fluentQueue;
     }
     public static String mkLitNameForCause(String s){
-        return "__cause__"+s;
+        return "___cause___"+s;
     }
     public static String mkLitNameForAlready(String s){
-        return "__already__"+s;
+        return "___already___"+s;
     }
 
     
     private static String mkLitNameForAction(String actionName, String [] c){
-        String res = "__action__" + actionName;
+        String res = "___action___" + actionName;
         for(String co:c){
             res+=co;
         }

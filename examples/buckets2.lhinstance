@@ -1,6 +1,5 @@
 $$$
 mkInteger('int',0,12)
---interactive()
 $$$
 
 constants:
@@ -13,7 +12,7 @@ initial:
 ;
 
 final:
-    contains(A,int4),-pulled(),-working()
+    contains(A,int4)
 ;
 
 $$$

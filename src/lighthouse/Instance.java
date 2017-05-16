@@ -428,8 +428,15 @@ public final class Instance
 
     private boolean cacheGet(String searchPred, List<String> searchArgs)
     {
+        try{
         int index[] = calcIndex(searchArgs);
         return initialCache.get(searchPred)[index[0]][index[1]][index[2]];
+        }
+        catch(Exception e){
+            System.err.println(searchPred);
+            System.err.println(searchArgs);
+            throw e;
+        }
     }
 
     

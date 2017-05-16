@@ -18,9 +18,14 @@ package lighthouse;
 
 import Report.DummyReport;
 import Report.Report;
+import Satplan.AzioneGround;
+import Satplan.Clause;
 import Satplan.FilterAxioms;
+import Satplan.HybridAxioms;
 import Satplan.SatPlanInstance;
 import Satplan.SatPlanSettings;
+import Stat.DummySatPlanInstance;
+import Stat.Stat;
 import it.uniroma1.di.tmancini.teaching.ai.SATCodec.SATModelDecoder;
 import it.uniroma1.di.tmancini.utils.CmdLineOptions;
 import java.io.FileNotFoundException;
@@ -31,8 +36,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.sat4j.minisat.SolverFactory;
@@ -82,6 +89,8 @@ public class LightHouse
         clo.addFlag("noreport", "disable report generation");
         clo.addOption("log", "filename for log file in xml format");
         clo.addFlag("show", "show the resulting xml");
+        clo.addFlag("benchmark", "run only benchmarks");
+        clo.addFlag("hybrid", "use hybrid method");
 		// Parses the command-line arguments. It raises an error in case mandatory options are not given
 		clo.parse(args);
 
@@ -95,11 +104,77 @@ public class LightHouse
             System.exit(1);
         }
         System.out.println(instance.getString());
+        if(clo.isFlagSet("benchmark")){
+            doBenchmarks(clo,instance);
+            return;
+        }
         doPDDL(clo,instance);
         doSatPlan(clo,instance); 
         
 
         
+    }
+    private static void doBenchmarks(CmdLineOptions clo, Instance instance){
+       Stat s = new Stat();
+       s.init(instance);
+       System.out.println("Running filtererd");
+       Set<AzioneGround> filActGr = FilterAxioms.mkSatPlan(instance, new DummySatPlanInstance() , new DummyReport(), s);
+       System.out.println("Running hybrid");
+        Set<AzioneGround> hyActGro=HybridAxioms.mkSatPlan(instance, new DummySatPlanInstance(), new DummyReport(), s);
+       s.print();
+       //Set<AzioneGround> fmh = new HashSet<>();
+       //fmh.addAll(filActGr);
+       //fmh.removeAll(hyActGro);
+       //Set<AzioneGround>hmf = new HashSet<>();
+       //hmf.addAll(hyActGro);
+       //hmf.removeAll(filActGr);
+       //Set<AzioneGround>diff = hmf;
+       //diff.addAll(fmh);
+       //System.out.println(filActGr);
+       //System.out.println(hyActGro);
+       //System.out.println(diff);
+       
+    }
+
+    private static void doBenchmarks2(CmdLineOptions clo, Instance instance){
+       Stat s = new Stat();
+       s.init(instance);
+       System.out.println("Running filtererd");
+       SatPlanInstance fi = new SatPlanInstance();
+       SatPlanInstance si = new SatPlanInstance();
+       Set<AzioneGround> filActGr = FilterAxioms.mkSatPlan(instance, fi , new DummyReport(), s);
+       System.out.println("Running hybrid");
+        Set<AzioneGround> hyActGro=HybridAxioms.mkSatPlan(instance, si, new DummyReport(), s);
+       s.print();
+       System.out.println("fi===============================");
+       for(Clause c:fi.clauses){
+           System.out.println(c);
+       }
+       System.out.println("===============================");
+       System.out.println("si++++++++++++++++++++++++++++++++");
+       for(Clause c:si.clauses){
+           System.out.println(c);
+       }
+       System.out.println("++++++++++++++++++++++++++++++++");
+
+       
+       //si.clauses.removeAll(fi.clauses);
+       //System.out.println(si.clauses.size());
+       //for(Clause c:si.clauses){
+       //    System.out.println(c);
+       //}
+       //Set<AzioneGround> fmh = new HashSet<>();
+       //fmh.addAll(filActGr);
+       //fmh.removeAll(hyActGro);
+       //Set<AzioneGround>hmf = new HashSet<>();
+       //hmf.addAll(hyActGro);
+       //hmf.removeAll(filActGr);
+       //Set<AzioneGround>diff = hmf;
+       //diff.addAll(fmh);
+       //System.out.println(filActGr);
+       //System.out.println(hyActGro);
+       //System.out.println(diff);
+       
     }
 
     private static void doSatPlan(CmdLineOptions clo,Instance instance){
@@ -118,7 +193,16 @@ public class LightHouse
             //Axioms.Axiom2(p.getInstance(),spi,r);
             //Axioms.Axiom3(p.getInstance(),spi,r);
             //HybridAxioms.mkSatPlan(p.getInstance(), spi, r);
-            FilterAxioms.mkSatPlan(instance, spi, r);
+           Stat s = new Stat();
+           s.init(instance);
+            if(clo.isFlagSet("hybrid")){
+                
+                HybridAxioms.mkSatPlan(instance, spi, r,s);
+            }
+            else{
+                FilterAxioms.mkSatPlan(instance, spi, r,s);
+            }
+            s.print();
             //Axioms.Axiom1(p.getInstance(),spi,r);
             spi.verify();
             String show = SatPlanSettings.ACTIONPREFIX+".*";

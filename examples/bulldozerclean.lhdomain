@@ -1,15 +1,11 @@
 
 
-predicates: road/2, at/2 , mobile/1, bridge/2 , person/1 , vehicle/1 , driving/2, wellrested/1;
+predicates: road/2, at/2 , mobile/1, bridge/2 , person/1 , vehicle/1 , driving/2;
 
 actions:
     drive(what,from,to){
         pre: road(from,to), at(what,from) , mobile(what) , -=(from,to);
         post: at(what,to), -at(what,from);
-    }
-    rest(who,where){
-        pre: at(who,where);
-        post: wellrested(who) ;
     }
 
     cross(what,from,to){
